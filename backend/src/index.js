@@ -1,4 +1,5 @@
 // Using dependencies
+const db = require("./services/db");
 const util = require("util");
 const express = require("express");
 const cors = require("cors"); // used to communicate with a backend from another URL
@@ -34,42 +35,50 @@ app.use((error, request, response, next) => {
   return;
 });
 
-//permet de renvoyer les infos générales sur le current user :
 app.get("/authentication/editUser", async (req, res, next) => {
-  db.query(
-    "SELECT * FROM test_management WHERE id = ?",
-    [req.params.id],
-    (err, rows) => {
-      if (!err) {
-        res.render("edituser", { rows });
-      } else {
-        console.log(err);
-      }
-
-      console.log("[edit] The data from the table : \n", rows);
-    }
-  );
+  const { Id_Admin, password } = req.body;
+  const idUser = await authentication.getId(Id_Admin, password);
+  return res.send({ message: idUser });
 });
 
-// permet de maj les infos du current user :
-app.put("/update", (req, res) => {
-  const id = req.body.id;
-  const prenom = req.body.prenom;
-  const nom = req.body.nom;
-
-  db.query(
-    "UPDATE Users SET prenom = ? nom = ? WHERE id = ?",
-    [prenom, nom, id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
+// permet de maj les infos du current user : EN COURS
+app.put("/authentication/update", (req, res) => {
+  const token = req.cookies.jwt;
+  console.log(token);
+  console.log("running validUser");
+  if (token) {
+    jwt.verify(
+      token,
+      "sljkfkectirerupâzaklndncwckvmàyutgri",
+      (err, decoded) => {
+        if (err) {
+          console.log("err");
+          console.log(err.message);
+          res.send({ message: "erreur" });
+        } else {
+          console.log("dedans");
+          //permet d'afficher l'object decoded
+          let user = decoded;
+          //user_final = util.inspect(user, false, null, true);
+          console.log(user);
+          const id = user.user_id;
+          db.query(
+            "UPDATE Users SET prenom = ? nom = ? WHERE id = ?",
+            [prenom, nom, id],
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              } else {
+                res.send({ message: id, prenom, nom });
+                res.send(result);
+              }
+            }
+          );
+        }
       }
-    }
-  );
+    );
+  }
 });
-
 
 //permet de supprimer le compte du current user :
 exports.delete = (req, res) => {
@@ -97,8 +106,7 @@ exports.delete = (req, res) => {
     }
   );
 };
-
-// Display the name and allowed logout when a person has succesfully login : EN COURS
+// Display the name and allowed logout when a person has succesfully login : OK
 app.get("/authentication/validUser", async (req, res, next) => {
   const token = req.cookies.jwt;
   console.log(token);
@@ -112,15 +120,18 @@ app.get("/authentication/validUser", async (req, res, next) => {
           console.log("err");
           console.log(err.message);
           res.send({ message: "erreur" });
-          res.locals.userID = null;
-          next();
+          res.locals.id = null;
         } else {
           console.log("dedans");
           //permet d'afficher l'object decoded
-          let user = decoded.userID;
-          console.log(util.inspect(user, false, null, true));
-          res.locals.userID = user;
-          next();
+          let user = decoded;
+          //user_final = util.inspect(user, false, null, true);
+          console.log(user);
+          const id = user.user_id;
+          const element1 = user.user_first_name;
+          const element2 = user.user_last_name;
+          const element3 = user.user_mail;
+          res.send({ element1, element2, element3 });
         }
       }
     );

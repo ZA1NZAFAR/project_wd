@@ -1,4 +1,5 @@
 const db = require("./db");
+const util = require("util");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
@@ -33,6 +34,23 @@ const require_Auth = (req, res, next) => {
     console.log(message);
     res.redirect("/LoginUser");
   }
+};
+
+//permet de renvoyer les infos générales sur le current user (no use) :
+const getId = async (id) => {
+  const rows = await db.query(`SELECT * FROM Users WHERE id= "${id}"`);
+  console.log(rows);
+  (err, rows) => {
+    // une fois la requête réalisée, on libère la connexion :
+    // When done with the connection, release it
+    if (!err) {
+      console.log("The data from the management table : \n", rows);
+    } else {
+      console.log(err);
+    }
+
+    return rows[0].prenom;
+  };
 };
 
 const getAdmin = async (Id_Admin, password) => {
@@ -74,9 +92,11 @@ const getUser = async (email, password) => {
     console.log(token);*/
 
     message = "User has been logged in";
-
     return {
-      userID: rows[0].email,
+      user_id : rows[0].id,
+      user_first_name: rows[0].prenom,
+      user_last_name: rows[0].nom,
+      user_mail: rows[0].email,
       message,
     };
   }
@@ -226,4 +246,5 @@ module.exports = {
   verifyUser,
   getPassword,
   require_Auth,
+  getId,
 };
