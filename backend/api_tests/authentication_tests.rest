@@ -1,0 +1,43 @@
+###
+POST http://localhost:5000/authentication/adminLogin
+Content-Type: application/json
+
+{
+    "Id_Admin": "super_admin", 
+    "password": "$2dlwlsmqw6vRM9LGPZ6dskjd6Ha6lT6OnId0f1EUshSp8AoOImVeSECGRa3aFgu" 
+}
+
+###
+POST http://localhost:5000/authentication/login
+Content-Type: application/json
+
+{
+    "email": "abc@gmail.com", 
+    "password": "123" 
+}
+
+###
+POST http://localhost:5000/authentication/signup
+Content-Type: application/json
+
+{
+    "email": "abc@gmail.com", 
+    "password": "123" 
+}
+
+###
+GET http://localhost:5000/authentication/logOK
+{
+  "user": "Registered_user",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjUzMzQwMDMxLCJleHAiOjE2NjExMTYwM
+zF9.kEIYrZXzZBIpaTFvo4Y1urlYT-tFvIsEkpDcNDMMZBE",
+  "cookies": { "expiresIn": 2022-08-21T21:07:11.810Z }
+}
+
+###
+POST http://localhost:5000/authentication/forgotPassword
+Content-Type: application/json
+
+{
+    "email": "abc@gmail.com"
+}

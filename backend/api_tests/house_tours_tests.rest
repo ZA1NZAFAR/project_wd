@@ -1,0 +1,9 @@
+POST http://localhost:5000/api/houseTours
+Content-Type: application/x-www-form-urlencoded
+
+clientId=1
+&propertyId=5
+&date=2022-10-15+15%3A00%3A00
+
+###
+GET http://localhost:5000/api/houseTours?page=1

@@ -1,0 +1,12 @@
+GET http://localhost:5000/api/transactions
+
+###
+POST http://localhost:5000/api/transactions
+Content-Type: application/json
+
+{
+    "prix": 856000,
+    "propertyId": 24,
+    "clientId": 1,
+    "commission": 36952
+}
