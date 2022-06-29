@@ -47,9 +47,19 @@ const ModifyUser = () => {
     });
   };
 
+  // FONCTION UPDATE PROBLEMATIQUE :
   const updateUser = () => {
+    /*const config = {
+      headers: {
+          'Content-Type': 'application/json'
+      }
+    }*/
     console.log("dans le front : ");
-    axios.put(baseUrl + "/uptadeUser" + "/" + id, prenom, nom, mail).then((response) => {
+    console.log(id);
+    console.log(prenom);
+    console.log(nom);
+    console.log(mail);
+    axios.put(baseUrl + "/uptadeUser" + "/" + id, JSON.stringify(prenom), JSON.stringify(nom), JSON.stringify(mail)).then((response) => {
       if (response.data) {
         alert("okay");
       } else {
@@ -57,6 +67,7 @@ const ModifyUser = () => {
       }
     });
   };
+///////
 
   useEffect(() => {
     currentUser();

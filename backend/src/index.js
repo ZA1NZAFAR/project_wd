@@ -50,14 +50,17 @@ app.delete(
   }
 );
 
+//update utilisé now : PROBLEME
 app.put("/authentication/updateUser/:id", async (request, response, next) => {
   try {
-    console.log("dans index : " + request.body);
+    console.log("dans index : " + request.body.prenom);
 
     response.json(
       await authentication.modify(
         request.params.id,
-        request.body
+        request.body.prenom,
+        request.body.nom,
+        request.body.mail
       )
     );
   } catch (error) {
@@ -65,6 +68,7 @@ app.put("/authentication/updateUser/:id", async (request, response, next) => {
     next(error);
   }
 });
+///////
 
 app.get("/authentication/editUser", async (req, res, next) => {
   const { Id_Admin, password } = req.body;

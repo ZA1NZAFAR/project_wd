@@ -48,7 +48,7 @@ const remove = async (id) => {
   return { message };
 };
 
-//permet de update les valeurs du current user :
+//permet de update les valeurs du current user : PROBLEME
 const modify = async (id, prenom, nom, mail) => {
   const result = await db.query(
     `UPDATE Users SET prenom="${prenom}", nom="${nom}", email=${mail} WHERE id="${id}"`
@@ -62,6 +62,7 @@ const modify = async (id, prenom, nom, mail) => {
 
   return { message };
 };
+////////
 
 //permet de renvoyer les infos générales sur le current user (no use) :
 const editUser = async (nom, prenom, id) => {
