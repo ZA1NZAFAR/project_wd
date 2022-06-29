@@ -36,6 +36,54 @@ const require_Auth = (req, res, next) => {
   }
 };
 
+const remove = async (id) => {
+  const result = await db.query(`DELETE FROM Visites WHERE id_visitor="${id}"`);
+
+  let message = "Error while deleting a user";
+
+  if (result.affectedRows) {
+    message = "User has been removed successfully";
+  }
+
+  return { message };
+};
+
+//permet de update les valeurs du current user :
+const modify = async (id, prenom, nom, mail) => {
+  const result = await db.query(
+    `UPDATE Users SET prenom="${prenom}", nom="${nom}", email=${mail} WHERE id="${id}"`
+  );
+
+  let message = "Error while updating a user";
+
+  if (result.affectedRows) {
+    message = "User has been updated successfully";
+  }
+
+  return { message };
+};
+
+//permet de renvoyer les infos générales sur le current user (no use) :
+const editUser = async (nom, prenom, id) => {
+  console.log("dans le auth " + nom);
+  console.log("dans le auth " + prenom);
+  const rows = await db.query(
+    `UPDATE Users SET prenom = "${prenom}" nom = "${nom}" WHERE id= "${id}"`
+  );
+  console.log(rows);
+  (err, rows) => {
+    // une fois la requête réalisée, on libère la connexion :
+    // When done with the connection, release it
+    if (!err) {
+      console.log("The data from the management table : \n", rows);
+    } else {
+      console.log(err);
+    }
+
+    return rows[0].prenom;
+  };
+};
+
 //permet de renvoyer les infos générales sur le current user (no use) :
 const getId = async (id) => {
   const rows = await db.query(`SELECT * FROM Users WHERE id= "${id}"`);
@@ -93,7 +141,7 @@ const getUser = async (email, password) => {
 
     message = "User has been logged in";
     return {
-      user_id : rows[0].id,
+      user_id: rows[0].id,
       user_first_name: rows[0].prenom,
       user_last_name: rows[0].nom,
       user_mail: rows[0].email,
@@ -247,4 +295,7 @@ module.exports = {
   getPassword,
   require_Auth,
   getId,
+  editUser,
+  remove,
+  modify,
 };

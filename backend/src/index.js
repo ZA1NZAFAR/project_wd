@@ -35,6 +35,37 @@ app.use((error, request, response, next) => {
   return;
 });
 
+app.delete(
+  "/authentication/deleteUser/:id",
+  async (request, response, next) => {
+    try {
+      console.log(request.params.id);
+
+      response.json(await authentication.remove(request.params.id));
+      console.log("fait");
+    } catch (error) {
+      console.error(`Error while removing a user `, error.message);
+      next(error);
+    }
+  }
+);
+
+app.put("/authentication/updateUser/:id", async (request, response, next) => {
+  try {
+    console.log("dans index : " + request.body);
+
+    response.json(
+      await authentication.modify(
+        request.params.id,
+        request.body
+      )
+    );
+  } catch (error) {
+    console.error(`Error while modifying user `, error.message);
+    next(error);
+  }
+});
+
 app.get("/authentication/editUser", async (req, res, next) => {
   const { Id_Admin, password } = req.body;
   const idUser = await authentication.getId(Id_Admin, password);
@@ -42,7 +73,13 @@ app.get("/authentication/editUser", async (req, res, next) => {
 });
 
 // permet de maj les infos du current user : EN COURS
-app.put("/authentication/update", (req, res) => {
+app.post("/authentication/update", async (req, res) => {
+  const nom = req.body.nom;
+  const prenom = req.body.prenom;
+  console.log("dans le index : " + nom);
+  console.log("dans le index : " + prenom);
+  const response = await authentication.editUser(nom, prenom, 1);
+  console.log(response);
   const token = req.cookies.jwt;
   console.log(token);
   console.log("running validUser");
@@ -62,50 +99,12 @@ app.put("/authentication/update", (req, res) => {
           //user_final = util.inspect(user, false, null, true);
           console.log(user);
           const id = user.user_id;
-          db.query(
-            "UPDATE Users SET prenom = ? nom = ? WHERE id = ?",
-            [prenom, nom, id],
-            (err, result) => {
-              if (err) {
-                console.log(err);
-              } else {
-                res.send({ message: id, prenom, nom });
-                res.send(result);
-              }
-            }
-          );
         }
       }
     );
   }
 });
 
-//permet de supprimer le compte du current user :
-exports.delete = (req, res) => {
-  //On définit les routers :
-  //permet de retourner au niveau de la page d'accueil :
-  db.getConnection((err, result) => {
-    if (err) throw err;
-    console.log("Connected as ID " + result.threadId);
-  });
-
-  db.query(
-    "DELETE FROM test_management WHERE id = ?",
-    [req.params.id],
-    (err, rows) => {
-      // une fois la requête réalisée, on libère la connexion :
-      // When done with the connection, release it
-      if (!err) {
-        let removedUser = encodeURIComponent("Okay user has been removed");
-        res.redirect("/?removed = " + removedUser);
-      } else {
-        console.log(err);
-      }
-
-      console.log("[delete] The data from the management table : \n", rows);
-    }
-  );
-};
 // Display the name and allowed logout when a person has succesfully login : OK
 app.get("/authentication/validUser", async (req, res, next) => {
   const token = req.cookies.jwt;
@@ -128,10 +127,14 @@ app.get("/authentication/validUser", async (req, res, next) => {
           //user_final = util.inspect(user, false, null, true);
           console.log(user);
           const id = user.user_id;
+          console.log("id : " + id);
           const element1 = user.user_first_name;
+          console.log("element1 : " + element1);
           const element2 = user.user_last_name;
+          console.log("element2 : " + element2);
           const element3 = user.user_mail;
-          res.send({ element1, element2, element3 });
+          console.log("element3 : " + element3);
+          res.send({ element1, element2, element3, id });
         }
       }
     );
