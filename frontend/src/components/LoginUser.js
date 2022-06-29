@@ -11,6 +11,8 @@ const LoginUser = ({ setRole, setID }) => {
   const baseUrl = "http://localhost:5000/authentication";
   const [email_signup, setemail_signup] = useState("");
   const [password_signup, setpassword_signup] = useState("");
+  const [first_name, setfirst_name] = useState("");
+  const [last_name, setlast_name] = useState("");
 
   const [email_login, setemail_login] = useState("");
   const [password_login, setpassword_login] = useState("");
@@ -23,6 +25,8 @@ const LoginUser = ({ setRole, setID }) => {
     Axios.post(baseUrl + "/signup", {
       email: email_signup,
       password: password_signup,
+      last_name: last_name,
+      first_name: first_name,
     }).then((response) => {
       if (response.data.message) {
         alert(response.data.message);
@@ -153,6 +157,30 @@ const LoginUser = ({ setRole, setID }) => {
               placeholder="password"
               onChange={(event) => {
                 setpassword_signup(event.target.value);
+              }}
+            />
+            <InputStyle
+              whileHover={{
+                scale: 1.1,
+                textShadow: "0px 0px 8px rgb(255,255,255)",
+                boxShadow: "0px 0px 8px rgb(255,255,255)",
+              }}
+              type="firstname"
+              placeholder="First Name"
+              onChange={(event) => {
+                setfirst_name(event.target.value);
+              }}
+            />
+            <InputStyle
+              whileHover={{
+                scale: 1.1,
+                textShadow: "0px 0px 8px rgb(255,255,255)",
+                boxShadow: "0px 0px 8px rgb(255,255,255)",
+              }}
+              type="lastname"
+              placeholder="Last Name"
+              onChange={(event) => {
+                setlast_name(event.target.value);
               }}
             />
           </InputContainer>

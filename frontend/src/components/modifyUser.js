@@ -49,25 +49,31 @@ const ModifyUser = () => {
 
   // FONCTION UPDATE PROBLEMATIQUE :
   const updateUser = () => {
-    /*const config = {
+    const config = {
       headers: {
-          'Content-Type': 'application/json'
-      }
-    }*/
+        "Content-Type": "application/json",
+      },
+    };
     console.log("dans le front : ");
     console.log(id);
     console.log(prenom);
     console.log(nom);
     console.log(mail);
-    axios.put(baseUrl + "/uptadeUser" + "/" + id, JSON.stringify(prenom), JSON.stringify(nom), JSON.stringify(mail)).then((response) => {
-      if (response.data) {
-        alert("okay");
-      } else {
-        alert("Something went wrong... Please try later.");
-      }
-    });
+    axios
+      .put(baseUrl + "/uptadeUser" + "/" + id, {
+        mail: mail,
+        prenom: prenom,
+        nom: nom,
+      }, config)
+      .then((response) => {
+        if (response.data) {
+          alert("okay");
+        } else {
+          alert("Something went wrong... Please try later.");
+        }
+      });
   };
-///////
+  ///////
 
   useEffect(() => {
     currentUser();
@@ -81,7 +87,7 @@ const ModifyUser = () => {
         <div class="form-floating mb-3">
           <input
             type="text"
-            name="Fisrt_name"
+            name="prenom"
             class="form-control"
             id="floatingInput"
             placeholder="First Name"
@@ -96,7 +102,7 @@ const ModifyUser = () => {
         <div class="form-floating mb-3">
           <input
             type="text"
-            name="Last_name"
+            name="nom"
             class="form-control"
             id="floatingInput"
             placeholder="Last Name"
@@ -111,7 +117,7 @@ const ModifyUser = () => {
         <div class="form-floating mb-3">
           <input
             type="text"
-            name="email"
+            name="mail"
             class="form-control"
             id="floatingInput"
             placeholder="email"

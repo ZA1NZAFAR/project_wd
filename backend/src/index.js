@@ -52,9 +52,11 @@ app.delete(
 
 //update utilisé now : PROBLEME
 app.put("/authentication/updateUser/:id", async (request, response, next) => {
+  const { email, prenom, nom } = request.body;
+  console.log("dans index !! ");
+  console.log("id dans index: "+ request.params.id)
+  console.log("prenom dans index : "+ prenom)
   try {
-    console.log("dans index : " + request.body.prenom);
-
     response.json(
       await authentication.modify(
         request.params.id,
@@ -183,7 +185,11 @@ app.post("/authentication/login", async (req, res, next) => {
     return res.send({ message: "Please enter your email & password" });
   else {
     try {
+      console.log("email value dans index: " + email);
+      console.log("password value dans index: " + password);
+
       const response = await authentication.getUser(email, password);
+      console.log("apres response");
       if (response.message === "User has been logged in") {
         const user = JSON.parse(JSON.stringify(response));
         const token = jwt.sign(user, "sljkfkectirerupâzaklndncwckvmàyutgri", {
@@ -225,6 +231,7 @@ app.post("/authentication/login", async (req, res, next) => {
     } catch (err) {
       console.log(`Error while checking user credentials `, err.message);
       res.status(400).json({ err });
+      //return res.send({ message: "Please check your email & password : one of them is incorrect" });
     }
   }
 });
@@ -242,12 +249,22 @@ app.get("/get-cookie", (req, res) => {
 
 // POST user credentials for signing up. Used to create new user accounts
 app.post("/authentication/signup", async (req, res, next) => {
-  const { email, password: password_ok } = req.body;
+  const {
+    email,
+    password: password_ok,
+    last_name: last_name,
+    first_name: first_name,
+  } = req.body;
   if (!email || !password_ok)
     return res.send({ message: "Please enter your email & password" });
   else {
     try {
-      const response = await authentication.createUser(email, password_ok);
+      const response = await authentication.createUser(
+        email,
+        password_ok,
+        last_name,
+        first_name
+      );
       if (response.message === "Registered successfully") {
         const user = JSON.parse(JSON.stringify(response));
         const token = jwt.sign(user, "sljkfkectirerupâzaklndncwckvmàyutgri", {

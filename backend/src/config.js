@@ -2,9 +2,9 @@
 const config = {
     db: {
         host: "remotemysql.com",
-        user: "0ntQr8hwQa",
-        password: "K9jpHmhg6k",
-        database: "0ntQr8hwQa",
+        user: "owlR9qNmhw",
+        password: "Giy7LuE5Ys",
+        database: "owlR9qNmhw",
     },
     listPerPage: 10,
 };

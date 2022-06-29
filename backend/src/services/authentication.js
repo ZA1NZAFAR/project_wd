@@ -1,3 +1,6 @@
+
+// *** USERS CRÉES *** : root@gmail.com & Projectwd2022
+// ADMIN : 
 const db = require("./db");
 const util = require("util");
 const jwt = require("jsonwebtoken");
@@ -37,9 +40,11 @@ const require_Auth = (req, res, next) => {
 };
 
 const remove = async (id) => {
-  const result = await db.query(`DELETE FROM Visites WHERE id_visitor="${id}"`);
+  const result = await db.query(
+    `DELETE FROM Customer WHERE IdCustomer ="${id}"`
+  );
 
-  let message = "Error while deleting a user";
+  let message = "Error while deleting a User";
 
   if (result.affectedRows) {
     message = "User has been removed successfully";
@@ -51,7 +56,7 @@ const remove = async (id) => {
 //permet de update les valeurs du current user : PROBLEME
 const modify = async (id, prenom, nom, mail) => {
   const result = await db.query(
-    `UPDATE Users SET prenom="${prenom}", nom="${nom}", email=${mail} WHERE id="${id}"`
+    `UPDATE Customer SET FirstName="${prenom}", LastName="${nom}", Email=${mail} WHERE idCustomer="${id}"`
   );
 
   let message = "Error while updating a user";
@@ -62,14 +67,13 @@ const modify = async (id, prenom, nom, mail) => {
 
   return { message };
 };
-////////
 
 //permet de renvoyer les infos générales sur le current user (no use) :
 const editUser = async (nom, prenom, id) => {
   console.log("dans le auth " + nom);
   console.log("dans le auth " + prenom);
   const rows = await db.query(
-    `UPDATE Users SET prenom = "${prenom}" nom = "${nom}" WHERE id= "${id}"`
+    `UPDATE Customer SET FirstName = "${prenom}" LastName = "${nom}" WHERE idCustomer= "${id}"`
   );
   console.log(rows);
   (err, rows) => {
@@ -87,7 +91,7 @@ const editUser = async (nom, prenom, id) => {
 
 //permet de renvoyer les infos générales sur le current user (no use) :
 const getId = async (id) => {
-  const rows = await db.query(`SELECT * FROM Users WHERE id= "${id}"`);
+  const rows = await db.query(`SELECT * FROM Customer WHERE id= "${id}"`);
   console.log(rows);
   (err, rows) => {
     // une fois la requête réalisée, on libère la connexion :
@@ -104,7 +108,7 @@ const getId = async (id) => {
 
 const getAdmin = async (Id_Admin, password) => {
   const rows = await db.query(
-    `SELECT Id_Admin, password FROM Admin WHERE Id_admin="${Id_Admin}" AND password="${password}"`
+    `SELECT IdAdmin, Password FROM Admin WHERE IdAdmin="${Id_Admin}" AND Password="${password}"`
   );
 
   let message;
@@ -121,11 +125,13 @@ const getAdmin = async (Id_Admin, password) => {
 };
 
 const getUser = async (email, password) => {
-  const rows = await db.query(`SELECT * FROM Users WHERE email="${email}"`);
+  const rows = await db.query(`SELECT * FROM Customer WHERE Email="${email}"`);
+  console.log("email value dans auth: "+email);
+  console.log("password value dans auth: "+password);
 
   let message;
 
-  if (!rows.length || !(await bcrypt.compare(password, rows[0].password))) {
+  if (!rows.length || !(await bcrypt.compare(password, rows[0].Password))) {
     message = "Email/password incorrect";
 
     return {
@@ -142,17 +148,20 @@ const getUser = async (email, password) => {
 
     message = "User has been logged in";
     return {
-      user_id: rows[0].id,
-      user_first_name: rows[0].prenom,
-      user_last_name: rows[0].nom,
-      user_mail: rows[0].email,
+      user_id: rows[0].IdCustomer,
+      user_first_name: rows[0].FirstName,
+      user_last_name: rows[0].LastName,
+      user_mail: rows[0].Email,
       message,
     };
   }
 };
 
-const createUser = async (email, password_ok) => {
-  const rows = await db.query(`SELECT * FROM Users WHERE email="${email}"`);
+const createUser = async (email, password_ok, last_name, first_name) => {
+  const rows = await db.query(`SELECT * FROM Customer WHERE Email="${email}"`);
+  console.log("email: " + email);
+  console.log("lastname: " + last_name);
+  console.log("firstname: " + first_name);
 
   let message;
 
@@ -168,7 +177,7 @@ const createUser = async (email, password_ok) => {
     if (email.match(regexEmail) && password_ok.match(regexpassword)) {
       const password = await bcrypt.hash(password_ok, 10);
       const result = await db.query(
-        `INSERT INTO Users SET email="${email}", password="${password}"`
+        `INSERT INTO Customer SET Email="${email}", Password="${password}", LastName="${last_name}", FirstName="${first_name}"`
       );
 
       if (result.affectedRows) {
@@ -195,7 +204,9 @@ const verifyUser = async (cookies) => {
     "sljkfkectirerupâzaklndncwckvmàyutgri"
   );
 
-  const rows = await db.query(`SELECT * FROM Users WHERE id="${decoded.id}"`);
+  const rows = await db.query(
+    `SELECT * FROM Customer WHERE idCustomer="${decoded.id}"`
+  );
 
   if (rows[0]) return rows[0];
 };
@@ -221,13 +232,14 @@ const getToken = async (token) => {
   }
 }
 
+// 
 =====*/
 
 //update/edit profile :
 
 const getPassword = async (user) => {
   const rows = await db.query(
-    `SELECT email, password from Users WHERE email="${user.email}"`
+    `SELECT Email, Password from Customer WHERE Email="${user.email}"`
   );
 
   let message;
@@ -235,13 +247,13 @@ const getPassword = async (user) => {
   if (rows[0]) {
     const mailOptions = {
       from: process.env.EMAIL,
-      to: rows[0].email,
-      subject: "Password recovery from Real Estate Managment System",
+      to: rows[0].Email,
+      subject: "Password recovery from Watchside",
       html:
         "<p><b>Your login details for RSMS</b><br><b>Email: </b>" +
-        resultat[0].email +
+        rows[0].Email +
         "<br><b>For the password, we have the encrypted version of it which is : </b>" +
-        resultat[0].password +
+        rows[0].Password +
         "<br><br>To make sure that you are the owner of this reset request, please contact our help center (<b>715-660-8405</b>) which will ask you to confirm your request certain characters present in this password </p>" +
         "<br><b><i>All member of our Help center team is looking for your call, </i></b></p>" +
         '<br><br><a href="http://localhost:3006/">Click here to be redirected to our website</a></p>',
@@ -251,8 +263,8 @@ const getPassword = async (user) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL,
-        pass: process.env.MAIL_PASSWORD,
+        user: "not.reply.db.project@gmail.com",
+        pass: "lvfsdezeaooroikr",
       },
     });
 
