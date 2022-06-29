@@ -125,7 +125,7 @@ const LoginUser = ({ setRole, setID }) => {
           <br />
           <br />
           <TextStyle>
-            <Link to={"/Forgot_password"}>Forgot password ?</Link>
+            <Link to={"/ForgotPassword"}>Forgot password ?</Link>
           </TextStyle>
 
           <br />

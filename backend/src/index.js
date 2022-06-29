@@ -54,8 +54,8 @@ app.delete(
 app.put("/authentication/updateUser/:id", async (request, response, next) => {
   const { email, prenom, nom } = request.body;
   console.log("dans index !! ");
-  console.log("id dans index: "+ request.params.id)
-  console.log("prenom dans index : "+ prenom)
+  console.log("id dans index: " + request.params.id);
+  console.log("prenom dans index : " + prenom);
   try {
     response.json(
       await authentication.modify(
@@ -324,6 +324,23 @@ app.post("/authentication/forgotPassword", async (req, res, next) => {
       next(err);
     }
   }
+
+  // Create a one-use link to reset the password :
+  const jwt_secret = "sljkfkectirerupâzaklndncwckvmàyutgri" + user.password;
+  const current_user = {
+    email: user.email,
+  };
+  //const element = authentication.getId(current_user.email);
+  const token = jwt.sign(current_user, jwt_secret, { expiresIn: "15m" });
+  const link = `http://localhost:5000/authentication/resetPassword/${token}`;
+  //console.log("les infos du user :" + element.IdCustomer);
+});
+
+//allow to access to reset password page :
+app.get("/authentication/resetPassword/:token", (req, res, next) => {
+  const { token } = req.params;
+  console.log("ici");
+  res.send(req.params);
 });
 
 // GET request to logout. Used to end user session and logout users from the website

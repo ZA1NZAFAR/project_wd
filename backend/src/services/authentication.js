@@ -90,8 +90,8 @@ const editUser = async (nom, prenom, id) => {
 };
 
 //permet de renvoyer les infos générales sur le current user (no use) :
-const getId = async (id) => {
-  const rows = await db.query(`SELECT * FROM Customer WHERE id= "${id}"`);
+const getId = async (Email) => {
+  const rows = await db.query(`SELECT * FROM Customer WHERE Email= "${Email}"`);
   console.log(rows);
   (err, rows) => {
     // une fois la requête réalisée, on libère la connexion :
@@ -102,7 +102,7 @@ const getId = async (id) => {
       console.log(err);
     }
 
-    return rows[0].prenom;
+    return rows[0].IdCustomer;
   };
 };
 

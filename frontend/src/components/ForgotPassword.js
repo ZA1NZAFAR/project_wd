@@ -9,7 +9,7 @@ const ForgotPassword = () => {
     const [password_login, setpassword_login] = useState('');
 
     const sendEmail = () => {
-        Axios.post(baseUrl, { email: email_login, password: password_login })
+        Axios.post(baseUrl, { email: email_login, password: password_login})
             .then((response) => {
                 if (response.data.message) {
                     alert(response.data.message);
