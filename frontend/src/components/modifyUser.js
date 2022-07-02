@@ -64,7 +64,7 @@ const ModifyUser = () => {
         mail: mail,
         prenom: prenom,
         nom: nom,
-      }, config)
+      })
       .then((response) => {
         if (response.data) {
           alert("okay");

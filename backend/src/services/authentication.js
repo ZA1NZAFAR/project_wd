@@ -1,6 +1,11 @@
+// *** USERS CRÉES *** : 
+/*root@gmail.com & Projectwd2022
+& 123
+*/
+// ADMIN CRÉE :
+/*
 
-// *** USERS CRÉES *** : root@gmail.com & Projectwd2022
-// ADMIN : 
+*/
 const db = require("./db");
 const util = require("util");
 const jwt = require("jsonwebtoken");
@@ -92,7 +97,8 @@ const editUser = async (nom, prenom, id) => {
 //permet de renvoyer les infos générales sur le current user (no use) :
 const getId = async (Email) => {
   const rows = await db.query(`SELECT * FROM Customer WHERE Email= "${Email}"`);
-  console.log(rows);
+  const user_id = rows[0].IdCustomer;
+  console.log(user_id);
   (err, rows) => {
     // une fois la requête réalisée, on libère la connexion :
     // When done with the connection, release it
@@ -126,8 +132,8 @@ const getAdmin = async (Id_Admin, password) => {
 
 const getUser = async (email, password) => {
   const rows = await db.query(`SELECT * FROM Customer WHERE Email="${email}"`);
-  console.log("email value dans auth: "+email);
-  console.log("password value dans auth: "+password);
+  console.log("email value dans auth: " + email);
+  console.log("password value dans auth: " + password);
 
   let message;
 
@@ -236,13 +242,67 @@ const getToken = async (token) => {
 =====*/
 
 //update/edit profile :
+const getLink = async (user) => {
+  const rows = await db.query(
+    `SELECT * from Customer WHERE Email="${user.email}"`
+  );
+  let message;
+  const user_id = rows[0].IdCustomer;
+  const user_mail = rows[0].Email;
+  const user_password = rows[0].Password;
+  console.log("***user_mail vaut : " + user_mail);
+  console.log("***user_password vaut : " + user_password);
+  console.log("***user_id vaut : " + user_id);
+
+  // Create a one-use link to reset the password :
+  const jwt_secret = "sljkfkectirerupâzaklndncwckvmàyutgri" + user_password;
+
+  const user_jwt = {
+    mail: user_mail,
+    id: user_id,
+  };
+  //var jsoninfo = JSON.parse(info);
+  console.log("id vaut:" + user_id);
+  //console.log("idCustomer: " + jsoninfo);
+  //const element = authentication.getId(current_user.email);
+  const token = jwt.sign(user_jwt, jwt_secret, { expiresIn: "15m" });
+  const link = `http://localhost:5000/authentication/resetPassword/${user_id}/${token}`;
+  console.log("lien: " + link);
+  message = "the link is: " + link;
+  return message;
+
+  // send the link to reset the password
+  //return res.send ({message: "the link to reset password : " + link});
+  //console.log("les infos du user :" + element.IdCustomer);
+};
 
 const getPassword = async (user) => {
   const rows = await db.query(
-    `SELECT Email, Password from Customer WHERE Email="${user.email}"`
+    `SELECT * from Customer WHERE Email="${user.email}"`
   );
-
   let message;
+  const user_id = rows[0].IdCustomer;
+  const user_mail = rows[0].Email;
+  const user_password = rows[0].Password;
+  console.log("***user_mail vaut : " + user_mail);
+  console.log("***user_password vaut : " + user_password);
+  console.log("***user_id vaut : " + user_id);
+
+  // Create a one-use link to reset the password :
+  const jwt_secret = "sljkfkectirerupâzaklndncwckvmàyutgri" + user_password;
+
+  const user_jwt = {
+    mail: user_mail,
+    id: user_id,
+  };
+  //var jsoninfo = JSON.parse(info);
+  console.log("id vaut:" + user_id);
+  //console.log("idCustomer: " + jsoninfo);
+  //const element = authentication.getId(current_user.email);
+  const token = jwt.sign(user_jwt, jwt_secret, { expiresIn: "15m" });
+  const link = `http://localhost:5000/authentication/resetPassword/${user_id}/${token}`;
+  console.log("lien: " + link);
+  message = "the link is: " + link;
 
   if (rows[0]) {
     const mailOptions = {
@@ -251,9 +311,11 @@ const getPassword = async (user) => {
       subject: "Password recovery from Watchside",
       html:
         "<p><b>Your login details for RSMS</b><br><b>Email: </b>" +
-        rows[0].Email +
+        user_mail +
         "<br><b>For the password, we have the encrypted version of it which is : </b>" +
-        rows[0].Password +
+        user_password +
+        "<br><b>The link to reset the password is the following : </b>" +
+        link +
         "<br><br>To make sure that you are the owner of this reset request, please contact our help center (<b>715-660-8405</b>) which will ask you to confirm your request certain characters present in this password </p>" +
         "<br><b><i>All member of our Help center team is looking for your call, </i></b></p>" +
         '<br><br><a href="http://localhost:3006/">Click here to be redirected to our website</a></p>',
@@ -311,4 +373,5 @@ module.exports = {
   editUser,
   remove,
   modify,
+  getLink,
 };

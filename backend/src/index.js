@@ -16,7 +16,9 @@ const transactions = require("./services/transactions");
 const jwt = require("jsonwebtoken");
 //const require_Auth = require("./services/require_Auth");
 const env = require("../src/");
-// Logging requests
+const bcrypt = require("bcryptjs");
+var methodOverride = require("method-override");
+// Logging requestselement1 :
 const requestLogger = (request, response, next) => {
   console.log("Method:", request.method);
   console.log("Path:", request.path);
@@ -50,20 +52,36 @@ app.delete(
   }
 );
 
+app.set("view engine", "ejs");
+
+app.use(methodOverride("/authentication/updateUser/:id"));
 //update utilisé now : PROBLEME
 app.put("/authentication/updateUser/:id", async (request, response, next) => {
-  const { email, prenom, nom } = request.body;
-  console.log("dans index !! ");
-  console.log("id dans index: " + request.params.id);
-  console.log("prenom dans index : " + prenom);
+  console.log("dans index update !");
+  const nom = request.body.nom;
+  const prenom = request.body.prenom;
+  const email = request.body.mail;
+  const id = request.params.id;
+
+  console.log("nom modifié: " + nom);
+  console.log("prenom modifié: " + prenom);
+  console.log("mail modifié: " + email);
+
+  const rows = await db.query(
+    `SELECT * FROM Customer WHERE IdCustomer = "${id}"`
+  );
+  var user_id = rows[0].IdCustomer;
+  var user_mail = rows[0].Email;
+  var user_last_name = rows[0].LastName;
+  var user_first_name = rows[0].FirstName;
+  console.log("id avant update: " + user_id);
+  console.log("email avant update: " + user_mail);
+  console.log("lastname avant update: " + user_last_name);
+  console.log("firstname avant update: " + user_first_name);
+
   try {
-    response.json(
-      await authentication.modify(
-        request.params.id,
-        request.body.prenom,
-        request.body.nom,
-        request.body.mail
-      )
+    const result = await db.query(
+      `UPDATE Customer SET FirstName="${prenom}", LastName="${nom}", Email=${email} WHERE idCustomer="${id}"`
     );
   } catch (error) {
     console.error(`Error while modifying user `, error.message);
@@ -162,7 +180,7 @@ app.post("/authentication/adminLogin", async (req, res, next) => {
       const response = await authentication.getAdmin(Id_Admin, password);
       const user = JSON.parse(JSON.stringify(response));
       const token = jwt.sign(user, "sljkfkectirerupâzaklndncwckvmàyutgri", {
-        expiresIn: 6000,
+        expiresIn: "240m",
       });
       res.cookie("jwt", token, {
         httpOnly: true,
@@ -193,7 +211,7 @@ app.post("/authentication/login", async (req, res, next) => {
       if (response.message === "User has been logged in") {
         const user = JSON.parse(JSON.stringify(response));
         const token = jwt.sign(user, "sljkfkectirerupâzaklndncwckvmàyutgri", {
-          expiresIn: 6000,
+          expiresIn: "240m",
         });
         res.cookie("jwt", token, {
           httpOnly: true,
@@ -315,32 +333,206 @@ app.get("/authentication/logOK", (req, res) => {
 // POST user credentials. Used in case if the user has forgotten their credentials
 app.post("/authentication/forgotPassword", async (req, res, next) => {
   const user = req.body;
+  const current_user = {
+    email: user.email,
+  };
+  /*
+  const rows = await db.query(
+    `SELECT * FROM Customer WHERE Email= "${current_user.email}"`
+  );
+  const user_id = rows[0].IdCustomer;
+  const user_mail = rows[0].Email;
+  const user_password = rows[0].Password;
+  console.log("***user_mail vaut : " + user_mail);
+  console.log("***user_password vaut : " + user_password);
+  console.log("***user_id vaut : " + user_id);
+  console.log("***email:" + current_user.email);
+*/
   if (!user.email) return res.send({ message: "Please enter your email" });
   else {
     try {
       res.json(await authentication.getPassword(user));
+      //const element = await authentication.getLink(user);
+      //console.log(element);
     } catch (err) {
       console.log(`Error while retreiving user password `, err.message);
       next(err);
     }
   }
-
+  /*
   // Create a one-use link to reset the password :
-  const jwt_secret = "sljkfkectirerupâzaklndncwckvmàyutgri" + user.password;
+  const jwt_secret = "sljkfkectirerupâzaklndncwckvmàyutgri" + user_password;
+
+  const user_jwt = {
+    mail: user_mail,
+    id: user_id,
+  };
+  //var jsoninfo = JSON.parse(info);
+  console.log("id vaut:" + user_id);
+  //console.log("idCustomer: " + jsoninfo);
+  //const element = authentication.getId(current_user.email);
+  const token = jwt.sign(user_jwt, jwt_secret, { expiresIn: "15m" });
+  const link = `http://localhost:5000/authentication/resetPassword/${user_id}/${token}`;
+  console.log("lien: " + link);
+  const message = "the link is: "+ link;
+  
+  // send the link to reset the password
+  //return res.send ({message: "the link to reset password : " + link});
+  //console.log("les infos du user :" + element.IdCustomer);
+*/
+});
+
+/*
+app.post("/authentication/getLink", async (req, res, next) => {
+  const user = req.body;
   const current_user = {
     email: user.email,
   };
-  //const element = authentication.getId(current_user.email);
-  const token = jwt.sign(current_user, jwt_secret, { expiresIn: "15m" });
-  const link = `http://localhost:5000/authentication/resetPassword/${token}`;
-  //console.log("les infos du user :" + element.IdCustomer);
+  /*
+  const rows = await db.query(
+    `SELECT * FROM Customer WHERE Email= "${current_user.email}"`
+  );
+  const user_id = rows[0].IdCustomer;
+  const user_mail = rows[0].Email;
+  const user_password = rows[0].Password;
+  console.log("***user_mail vaut : " + user_mail);
+  console.log("***user_password vaut : " + user_password);
+  console.log("***user_id vaut : " + user_id);
+  console.log("***email:" + current_user.email);
+
+  if (!user.email) return res.send({ message: "Please enter your email" });
+  else {
+    try {
+      res.json(await authentication.getLink(user));
+    } catch (err) {
+      console.log(`Error while retreiving user password `, err.message);
+      next(err);
+    }
+  }
+});
+*/
+
+//When the customer click on the link, the following redirect to the reset password page  :
+app.get("/authentication/resetPassword/:id/:token", async (req, res, next) => {
+  const user = req.body;
+  console.log(user);
+  const { id, token } = req.params;
+  //typeof(id) = string => need to parse it to be able after to compare it with the user_id :
+  const id_int = parseInt(id);
+  console.log("id vaut : " + id_int);
+  console.log("son type: " + typeof id_int);
+
+  console.log("token : " + token);
+  const rows = await db.query(
+    `SELECT * FROM Customer WHERE IdCustomer = "${id}"`
+  );
+  const user_mail = rows[0].Email;
+  const user_password = rows[0].Password;
+  const user_id = rows[0].IdCustomer;
+  console.log("user_mail vaut : " + user_mail);
+  console.log("user_password vaut : " + user_password);
+  console.log("user_id vaut : " + user_id);
+  console.log("son type: " + typeof user_id);
+  // Create a one-use link to reset the password :
+  const jwt_secret = "sljkfkectirerupâzaklndncwckvmàyutgri" + user_password;
+  /*
+  const current_user = {
+    email: user.email,
+  };
+  
+  console.log("***email:" + current_user.email);
+  const rows = await db.query(
+    `SELECT * FROM Customer WHERE Email= "${current_user.email}"`
+  );
+  const user_id = rows[0].IdCustomer;
+  //const user_id = rows[0].IdCustomer;
+  //var jsoninfo = JSON.parse(info);
+  console.log("info vaut:" + user_id);
+
+  const { id, token } = req.params;
+  console.log("id vaut : " + id);
+  //console.log("user_id vaut : " + user_id);
+*/
+  /*
+  console.log("resetpassword ici");
+  //Check if the user id is present or not :
+  //user id is not present :
+  if (id != user_id) {
+    res.send("Error this id doesn't exist");
+    return;
+  }*/
+  //if the user id is present :
+
+  if (id_int !== user_id) {
+    res.send("Error this id doesn't exist");
+    return;
+  }
+
+  try {
+    const payload = jwt.verify(token, jwt_secret);
+    console.log("payload vaut:");
+    console.log(payload);
+    res.render("resetPassword", { email: user_mail });
+  } catch (error) {
+    console.log(error.message);
+    res.send(error.message);
+  }
+  //res.send(req.params);
 });
 
-//allow to access to reset password page :
-app.get("/authentication/resetPassword/:token", (req, res, next) => {
-  const { token } = req.params;
-  console.log("ici");
-  res.send(req.params);
+//??? :
+app.post("/authentication/resetPassword/:id/:token", async (req, res, next) => {
+  const { id, token } = req.params;
+  const id_int = parseInt(id);
+  console.log("id vaut : " + id_int);
+  console.log("son type: " + typeof id_int);
+  const { password, password2 } = req.body;
+  console.log("id vaut : " + id);
+  console.log("token : " + token);
+  const rows = await db.query(
+    `SELECT * FROM Customer WHERE IdCustomer = "${id}"`
+  );
+  var user_id = rows[0].IdCustomer;
+  var user_mail = rows[0].Email;
+  var user_password = rows[0].Password;
+
+  console.log("dans le dernier id : " + user_id);
+  console.log("dans le dernier email : " + user_mail);
+  console.log("dans le dernier password : " + user_password);
+  //Check the user id :
+  if (id_int !== user_id) {
+    res.send("Id user incorrect...");
+    return;
+  }
+
+  const jwt_secret = "sljkfkectirerupâzaklndncwckvmàyutgri" + user_password;
+  try {
+    const payload = jwt.verify(token, jwt_secret);
+    //Crypt that password from resetPassword.ejs then update the value of the current user :
+    var password_crypted = await bcrypt.hash(password, 10);
+    user_password = password_crypted;
+    console.log("le mdp modifié: " + user_password);
+    const result = await db.query(
+      `UPDATE Customer SET Password="${user_password}" WHERE idCustomer="${id}"`
+    );
+    const rows_f = await db.query(
+      `SELECT * FROM Customer WHERE IdCustomer = "${id}"`
+    );
+    /*
+    var user_id = rows_f[0].IdCustomer;
+    var user_mail = rows_f[0].Email;
+    var user_password = rows_f[0].Password;
+    var user_first_name = rows_f[0].FirstName;
+    var user_last_name = rows_f[0].LastName;
+    console.log("dans le dernier id : " + user_id);
+    console.log("dans le dernier email : " + user_mail);
+    console.log("dans le dernier password : " + user_password);
+    */
+    res.send(rows_f);
+  } catch (error) {
+    console.log(error.message);
+    res.send(error.message);
+  }
 });
 
 // GET request to logout. Used to end user session and logout users from the website

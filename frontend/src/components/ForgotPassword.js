@@ -4,6 +4,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {
     const baseUrl = "http://localhost:5000/authentication/forgotPassword";
+    const baseUrl2 = "http://localhost:5000/authentication/getLink";
     const navigate = useNavigate();
     const [email_login, setemail_login] = useState('');
     const [password_login, setpassword_login] = useState('');
@@ -13,6 +14,17 @@ const ForgotPassword = () => {
             .then((response) => {
                 if (response.data.message) {
                     alert(response.data.message);
+                } else {
+                    alert("Something went wrong... Please try later.");
+                }
+            });
+    }
+
+    const getLink = () => {
+        Axios.post(baseUrl2, { email: email_login, password: password_login})
+            .then((response) => {
+                if (response.data) {
+                    alert(response.data);
                 } else {
                     alert("Something went wrong... Please try later.");
                 }
@@ -70,6 +82,9 @@ const ForgotPassword = () => {
                         </button>
                         <button id="no btn" className="btn btn-danger" type="submit" onClick={redirectLogin}>
                             Back to Login
+                        </button>
+                        <button id="no btn" className="btn btn-success" type="submit" onClick={getLink}>
+                            Link
                         </button>
                     </div>
                 </div>
