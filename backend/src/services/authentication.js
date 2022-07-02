@@ -1,11 +1,13 @@
-// *** USERS CRÉES *** : 
-/*root@gmail.com & Projectwd2022
-& 123
+// *** USERS CRÉES *** :
+/*
+email : root@gmail.com & mdp: Projectwd2022
+email : nasolel469@lankew.com & mdp : 123
 */
 // ADMIN CRÉE :
 /*
-
+email : super_admin@gmail.com & mdp: $2a$10$A6/Z3lHzS4.w62/jT.ojHewAYU19e.FcgR6dlngTX13xjIVByxSYK
 */
+
 const db = require("./db");
 const util = require("util");
 const jwt = require("jsonwebtoken");
@@ -14,6 +16,7 @@ const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
+// Use to implement authentication protected route :
 const require_Auth = (req, res, next) => {
   const token = req.cookies.jwt;
   console.log("nothing");
@@ -44,6 +47,7 @@ const require_Auth = (req, res, next) => {
   }
 };
 
+//delete current user :
 const remove = async (id) => {
   const result = await db.query(
     `DELETE FROM Customer WHERE IdCustomer ="${id}"`
@@ -58,7 +62,7 @@ const remove = async (id) => {
   return { message };
 };
 
-//permet de update les valeurs du current user : PROBLEME
+//update current user info : PROBLEME
 const modify = async (id, prenom, nom, mail) => {
   const result = await db.query(
     `UPDATE Customer SET FirstName="${prenom}", LastName="${nom}", Email=${mail} WHERE idCustomer="${id}"`
@@ -73,7 +77,7 @@ const modify = async (id, prenom, nom, mail) => {
   return { message };
 };
 
-//permet de renvoyer les infos générales sur le current user (no use) :
+// Use to update/edit profile of the current user (1):
 const editUser = async (nom, prenom, id) => {
   console.log("dans le auth " + nom);
   console.log("dans le auth " + prenom);
@@ -82,8 +86,6 @@ const editUser = async (nom, prenom, id) => {
   );
   console.log(rows);
   (err, rows) => {
-    // une fois la requête réalisée, on libère la connexion :
-    // When done with the connection, release it
     if (!err) {
       console.log("The data from the management table : \n", rows);
     } else {
@@ -94,14 +96,12 @@ const editUser = async (nom, prenom, id) => {
   };
 };
 
-//permet de renvoyer les infos générales sur le current user (no use) :
+// Use to update/edit profile of the current user (2):
 const getId = async (Email) => {
   const rows = await db.query(`SELECT * FROM Customer WHERE Email= "${Email}"`);
   const user_id = rows[0].IdCustomer;
   console.log(user_id);
   (err, rows) => {
-    // une fois la requête réalisée, on libère la connexion :
-    // When done with the connection, release it
     if (!err) {
       console.log("The data from the management table : \n", rows);
     } else {
@@ -112,10 +112,19 @@ const getId = async (Email) => {
   };
 };
 
-const getAdmin = async (Id_Admin, password) => {
+//Check Admin account :
+const getAdmin = async (email_Admin, password) => {
   const rows = await db.query(
-    `SELECT IdAdmin, Password FROM Admin WHERE IdAdmin="${Id_Admin}" AND Password="${password}"`
+    `SELECT IdAdmin, Password FROM Admin WHERE Email="${email_Admin}" AND Password="${password}"`
   );
+  console.log("id de l'admin:" + email_Admin);
+  console.log("mdp de l'admin:" + password);
+
+  console.log(rows);
+  const element1 = rows[0].IdAdmin;
+  const element2 = rows[0].Password;
+  console.log("element1: " + element1);
+  console.log("element2: " + element2);
 
   let message;
 
@@ -130,6 +139,7 @@ const getAdmin = async (Id_Admin, password) => {
   };
 };
 
+//Check user account :
 const getUser = async (email, password) => {
   const rows = await db.query(`SELECT * FROM Customer WHERE Email="${email}"`);
   console.log("email value dans auth: " + email);
@@ -144,14 +154,6 @@ const getUser = async (email, password) => {
       message,
     };
   } else {
-    /*const user = JSON.parse(JSON.stringify(email));
-    const token = jwt.sign({ username: user }, "secret", { expiresIn: "1h" });
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      //maxAge: maxAge * 1000,
-    });
-    console.log(token);*/
-
     message = "User has been logged in";
     return {
       user_id: rows[0].IdCustomer,
@@ -163,6 +165,7 @@ const getUser = async (email, password) => {
   }
 };
 
+//To create a new User with regex checking :
 const createUser = async (email, password_ok, last_name, first_name) => {
   const rows = await db.query(`SELECT * FROM Customer WHERE Email="${email}"`);
   console.log("email: " + email);
@@ -217,31 +220,7 @@ const verifyUser = async (cookies) => {
   if (rows[0]) return rows[0];
 };
 
-/* PROBLEME ==== 
-const getToken = async (token) => {
-  console.log(token);
-  console.log("running");
-  if (token) {jwt.verify(token,"sljkfkectirerupâzaklndncwckvmàyutgri",(err, decoded) => {
-        if (err) {
-          console.log("err");
-          console.log(err.message);
-          res.send({ message: "erreur" });
-        } else {
-          console.log("ok : " + token);
-          res.send({ message: "yes connected"});
-        }
-      }
-    );
-  } else {
-    console.log("noooooooo");
-    res.send({ message: "no connected" });
-  }
-}
-
-// 
-=====*/
-
-//update/edit profile :
+//reset password :
 const getLink = async (user) => {
   const rows = await db.query(
     `SELECT * from Customer WHERE Email="${user.email}"`
